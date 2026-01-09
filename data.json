@@ -1,0 +1,54 @@
+{
+  "siteTitle": "Creative Director",
+  "heroProjects": [
+    {
+      "title": "Showreel 2026",
+      "subtitle": "CINEMA 4D / REDSHIFT",
+      "vimeoId": "939142083"
+    },
+    {
+      "title": "Visual Arts",
+      "subtitle": "ART DIRECTION",
+      "vimeoId": "1153001938"
+    },
+    {
+      "title": "Motion Design",
+      "subtitle": "HOUDINI / NUKE",
+      "vimeoId": "787522255"
+    }
+  ],
+  "gridProjects": [
+    {
+      "title": "Fashion Film",
+      "category": "Director / DOP",
+      "vimeoId": "792462000",
+      "extraVideos": []
+    },
+    {
+      "title": "Product Render",
+      "category": "3D Design",
+      "vimeoId": "792462447",
+      "extraVideos": []
+    },
+    {
+      "title": "Logo Animation",
+      "category": "Motion Graphics",
+      "vimeoId": "769403313",
+      "extraVideos": []
+    },
+    {
+      "title": "Character Design",
+      "category": "Concept Art",
+      "vimeoId": "792462677",
+      "extraVideos": []
+    }
+  ],
+  "photoCategories": [
+    {
+      "id": "fashion",
+      "title": "Fashion",
+      "coverImage": "images/fashion_cover.jpg",
+      "images": []
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images"
+public_folder: "images"
+
+collections:
+  - name: "settings"
+    label: "Settings"
+    files:
+      - name: "global"
+        label: "Global Data"
+        file: "data.json"
+        fields:
+          - { label: "Site Title", name: "siteTitle", widget: "string" }
+          
+          - label: "Motion Slider (Hero)"
+            name: "heroProjects"
+            widget: "list"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Subtitle", name: "subtitle", widget: "string" }
+              - { label: "Vimeo ID (Sadece Rakamlar)", name: "vimeoId", widget: "string", hint: "Örn: 939142083" }
+
+          - label: "Archive Grid"
+            name: "gridProjects"
+            widget: "list"
+            fields:
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Category", name: "category", widget: "string" }
+              - { label: "Main Vimeo ID", name: "vimeoId", widget: "string", hint: "Ana videonun ID'si" }
+              - label: "Extra Videos (Modalda Görünür)"
+                name: "extraVideos"
+                widget: "list"
+                required: false
+                fields:
+                   - { label: "Vimeo ID", name: "id", widget: "string" }
+
+          - label: "Photography Categories"
+            name: "photoCategories"
+            widget: "list"
+            fields:
+              - { label: "Category ID", name: "id", widget: "string" }
+              - { label: "Title", name: "title", widget: "string" }
+              - { label: "Cover Image", name: "coverImage", widget: "image" }
+              - label: "Gallery Images"
+                name: "images"
+                widget: "list"
+                fields:
+                  - { label: "Image", name: "src", widget: "image" }

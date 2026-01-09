@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmet Keles | Photography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #111; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: rgba(0, 0, 0, 0.4); }
+        .category-card { cursor: pointer; position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background-color: #f3f3f3; }
+        .category-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.3s ease; }
+        .plus-icon { position: absolute; top: 0; right: 0; width: 48px; height: 48px; background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 300; transition: background-color 0.3s; z-index: 10; }
+        .category-card:hover .plus-icon { background-color: #333; }
+        .gallery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: #ffffff; overflow-y: auto; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1); }
+        .gallery-open { transform: translateY(0); }
+        .masonry-grid { column-count: 1; column-gap: 2rem; }
+        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
+        .photo-item { break-inside: avoid; margin-bottom: 2rem; cursor: zoom-in; opacity: 0; transform: translateY(30px); width: 100%; display: block; border-radius: 2px; }
+        
+        /* LIGHTBOX & SLIDE */
+        #lightbox { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; background: rgba(255, 255, 255, 0.98); }
+        #lightbox.active { opacity: 1; pointer-events: all; }
+        #lightbox-wrapper { position: relative; width: 100%; height: 100%; max-height: 95vh; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
+        .lb-img-element { max-width: 100%; max-height: 95vh; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: absolute; }
+
+        .lb-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; transition: all 0.3s ease; z-index: 20; }
+        .lb-nav-btn:hover { transform: translateY(-50%) scale(1.1); color: #000; }
+        .lb-prev { left: 20px; }
+        .lb-next { right: 20px; }
+
+        .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .apple-box { border-radius: 2rem; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(30px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8); color: white; }
+        .glass-btn { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; cursor: pointer; text-decoration: none; }
+        .glass-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); }
+        .mobile-menu-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        .mobile-menu-overlay.active { opacity: 1; pointer-events: all; }
+        .mobile-link { font-size: 3rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; margin-bottom: 2rem; color: black; text-align: center; opacity: 0; transform: translateY(30px); transition: color 0.3s ease; cursor: pointer; }
+        .mobile-link:hover { color: #666; }
+    </style>
+</head>
+<body>
+
+    <nav class="fixed top-0 left-0 w-full z-[100] px-8 py-8 flex justify-between items-center mix-blend-difference pointer-events-none">
+        <a href="index.html" class="text-4xl font-black tracking-tighter uppercase text-white cursor-pointer pointer-events-auto relative z-[102]">Ahmet Keles.</a>
+        <div class="hidden md:flex space-x-8 text-sm font-medium tracking-wide pointer-events-auto uppercase">
+            <a href="index.html" class="text-white hover:opacity-70 transition">Motion</a>
+            <a href="photo.html" class="text-white border-b border-white pb-1">Photography</a>
+            <button onclick="toggleAbout(true)" class="text-white hover:opacity-70 transition uppercase">ABOUT</button>
+        </div>
+        <button onclick="toggleMobileMenu()" class="md:hidden pointer-events-auto text-white focus:outline-none z-[102] relative">
+            <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg>
+        </button>
+    </nav>
+
+    <div id="mobile-menu" class="mobile-menu-overlay">
+        <a href="index.html" class="mobile-link">Motion</a>
+        <a href="photo.html" class="mobile-link text-gray-400">Photography</a>
+        <button onclick="toggleAbout(true); toggleMobileMenu();" class="mobile-link">About</button>
+    </div>
+
+    <main class="min-h-screen pt-40 pb-12 px-6 md:px-12 max-w-[1600px] mx-auto flex flex-col justify-between">
+        <div>
+            <div class="mb-24 md:pl-2">
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-black uppercase leading-none">Photography<span class="text-gray-400">.</span></h1>
+                <p class="text-gray-400 mt-6 text-lg font-light tracking-wide uppercase">Selected frames from London & beyond.</p>
+            </div>
+            <div id="category-container" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-32 mb-32"></div>
+        </div>
+        <footer class="text-center text-xs text-gray-400 uppercase tracking-widest pb-4 border-t border-gray-100 pt-8 mt-auto">© 2026 Ahmet Keles. A Cravis Ltd. Production.</footer>
+    </main>
+
+<div id="about-modal" class="modal-overlay fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="absolute inset-0" onclick="toggleAbout(false)"></div>
+        <div class="relative w-full max-w-3xl p-6 md:p-16 max-h-[90vh] overflow-y-auto apple-box transform scale-95 opacity-0" id="about-box">
+            <button onclick="toggleAbout(false)" class="absolute top-4 right-4 md:top-8 md:right-8 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition z-50">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 md:w-5 md:h-5 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="text-center mt-6 md:mt-0">
+                <h2 class="text-4xl md:text-7xl font-black tracking-tighter text-white mb-6 md:mb-10">Hi!</h2>
+                <div class="space-y-4 md:space-y-6 text-sm md:text-xl text-gray-300 font-light leading-relaxed">
+                    <p>I'm a London-based 3D Motion Designer / Photographer.</p>
+                    <p>With 15 years of experience in photography and 3 years of experience in 3D motion design, I've been fortunate enough to work with some of the best brands around the world.</p>
+                    <p>My years of experience in photography and videography allow me to bring a unique perspective to my 3D work. My broad skill set allows me to either join teams remotely or on-location or take on projects from initial concept to the very end result on my own.</p>
+                    <p class="text-white font-normal pt-2">Please feel free to get in touch with me.</p>
+                </div>
+                <div class="mt-8 md:mt-10 pb-4">
+                    <a href="mailto:hi@ahmetkeles.co.uk" class="inline-block glass-btn px-6 py-3 md:px-10 md:py-5 rounded-full text-lg md:text-3xl font-bold text-white transition-all hover:bg-white hover:text-black hover:scale-105">hi@ahmetkeles.co.uk</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gallery-layer" class="gallery-overlay">
+        <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-md px-6 md:px-12 py-6 flex justify-between items-center border-b border-gray-100">
+            <h2 id="gallery-title" class="text-2xl md:text-4xl font-bold tracking-tighter text-black">Category Title</h2>
+            <button onclick="closeGallery()" class="group flex items-center gap-2 text-sm uppercase tracking-widest font-medium hover:text-gray-600 transition">
+                <span>Close</span>
+                <div class="w-8 h-8 rounded-full border border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition">✕</div>
+            </button>
+        </div>
+        <div class="max-w-[1600px] mx-auto px-6 md:px-12 py-16">
+            <div id="masonry-container" class="masonry-grid"></div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 z-[120] flex items-center justify-center p-4 cursor-zoom-out select-none" onclick="if(event.target === this) closeLightbox()">
+        <div class="lb-nav-btn lb-prev hidden md:flex" onclick="changeImage(-1)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+        </div>
+        <div id="lightbox-wrapper" class="relative w-full h-full max-h-[95vh] flex items-center justify-center overflow-hidden pointer-events-none"></div>
+        <div class="lb-nav-btn lb-next hidden md:flex" onclick="changeImage(1)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+        </div>
+        <div class="absolute bottom-8 text-gray-400 text-xs tracking-[0.2em] uppercase pointer-events-none">Click outside or press ESC to close</div>
+    </div>
+
+    <script>
+        const container = document.getElementById('category-container');
+        const galleryLayer = document.getElementById('gallery-layer');
+        const masonry = document.getElementById('masonry-container');
+        const galleryTitle = document.getElementById('gallery-title');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxWrapper = document.getElementById('lightbox-wrapper');
+        let siteData = {};
+
+        // JSON FETCH
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                siteData = data;
+                initGallery();
+            })
+            .catch(error => console.error('Error loading data:', error));
+
+        function initGallery() {
+            if (siteData && siteData.photography) {
+                siteData.photography.forEach((cat, index) => {
+                    const wrapper = document.createElement('div');
+                    if (index % 2 === 1) wrapper.className = "md:mt-32"; 
+
+                    wrapper.innerHTML = `
+                        <div class="category-card group mb-6" onclick="openGallery('${cat.id}')">
+                            <div class="plus-icon">+</div>
+                            <img src="${cat.cover}" alt="${cat.title}">
+                        </div>
+                        <div class="flex justify-between items-start border-t border-gray-200 pt-6">
+                            <h3 class="text-5xl md:text-7xl font-black tracking-tighter text-black cursor-pointer hover:text-gray-600 transition-colors uppercase leading-[0.9]" onclick="openGallery('${cat.id}')">
+                                ${cat.title}
+                            </h3>
+                            <span class="text-sm font-mono text-gray-400 mt-2">[ ${cat.photos.length} ]</span>
+                        </div>
+                    `;
+                    container.appendChild(wrapper);
+                });
+            }
+        }
+
+        let currentPhotoList = [];
+        let currentPhotoIndex = 0;
+        let isAnimating = false;
+
+        function openGallery(catId) {
+            const category = siteData.photography.find(c => c.id === catId);
+            if (!category) return;
+            galleryTitle.innerText = category.title;
+            masonry.innerHTML = ''; 
+            currentPhotoList = category.photos;
+            category.photos.forEach((photoUrl, idx) => {
+                const img = document.createElement('img');
+                img.src = photoUrl;
+                img.className = 'photo-item hover:opacity-90 transition-opacity';
+                img.onclick = (e) => { e.stopPropagation(); openLightbox(idx); };
+                masonry.appendChild(img);
+            });
+            galleryLayer.classList.add('gallery-open');
+            document.body.style.overflow = 'hidden'; 
+            gsap.to('.photo-item', { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, delay: 0.3, ease: "power2.out" });
+        }
+        function closeGallery() {
+            galleryLayer.classList.remove('gallery-open');
+            document.body.style.overflow = '';
+            gsap.set('.photo-item', { opacity: 0, y: 30 });
+        }
+
+        function openLightbox(index) {
+            currentPhotoIndex = index;
+            lightboxWrapper.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = currentPhotoList[currentPhotoIndex];
+            img.className = 'lb-img-element';
+            lightboxWrapper.appendChild(img);
+            lightbox.classList.add('active');
+            document.addEventListener('keydown', handleKeydown);
+        }
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.removeEventListener('keydown', handleKeydown);
+            setTimeout(() => { lightboxWrapper.innerHTML = ''; }, 300);
+        }
+
+        // SLIDE ANIMASYON MANTIĞI
+        function changeImage(direction) {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const oldIndex = currentPhotoIndex;
+            currentPhotoIndex += direction;
+            if (currentPhotoIndex < 0) currentPhotoIndex = currentPhotoList.length - 1;
+            else if (currentPhotoIndex >= currentPhotoList.length) currentPhotoIndex = 0;
+
+            const nextUrl = currentPhotoList[currentPhotoIndex];
+            const newImg = document.createElement('img');
+            newImg.src = nextUrl;
+            newImg.className = 'lb-img-element';
+            lightboxWrapper.appendChild(newImg);
+
+            const oldImg = lightboxWrapper.children[0]; 
+
+            // Yön Hesaplama: 
+            // 1 (İleri): Yeni sağdan gelir, Eski sola gider.
+            // -1 (Geri): Yeni soldan gelir, Eski sağa gider.
+            const startX = direction > 0 ? "100%" : "-100%";
+            const exitX = direction > 0 ? "-100%" : "100%";
+
+            gsap.set(newImg, { x: startX });
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    if(oldImg) oldImg.remove();
+                    isAnimating = false;
+                }
+            });
+            // Easing 'power2.inOut' kullanılarak smooth bir kayma sağlandı
+            tl.to(oldImg, { x: exitX, duration: 0.5, ease: "power2.inOut" }, 0)
+              .to(newImg, { x: "0%", duration: 0.5, ease: "power2.inOut" }, 0);
+        }
+
+        function handleKeydown(e) {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') changeImage(-1);
+            if (e.key === 'ArrowRight') changeImage(1);
+        }
+        let touchStartX = 0;
+        let touchEndX = 0;
+        lightbox.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+        lightbox.addEventListener('touchend', (e) => { 
+            touchEndX = e.changedTouches[0].screenX; 
+            if (touchEndX < touchStartX - 50) changeImage(1);
+            if (touchEndX > touchStartX + 50) changeImage(-1);
+        }, {passive: true});
+
+        function animateModal(modalId, boxId, show) {
+            const modal = document.getElementById(modalId);
+            const box = document.getElementById(boxId);
+            if (show) {
+                modal.classList.add('active');
+                gsap.fromTo(box, { scale: 0.95, opacity: 0, filter: "blur(10px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" });
+            } else {
+                modal.classList.remove('active');
+            }
+        }
+        function toggleAbout(show) { animateModal('about-modal', 'about-box', show); }
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            const isActive = menu.classList.contains('active');
+            if (!isActive) {
+                menu.classList.add('active');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />';
+                gsap.fromTo('.mobile-link', { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power3.out" });
+            } else {
+                menu.classList.remove('active');
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />';
+            }
+        }
+    </script>
+</body>
+</html>
