@@ -1,6 +1,9 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: Cr4vis/ahmetkeles-final
   branch: main
+  base_url: https://cravis-auth.cr4vis.workers.dev
+  auth_endpoint: /auth
 
 media_folder: "images"
 public_folder: "images"
@@ -48,4 +51,5 @@ collections:
                 name: "images"
                 widget: "list"
                 fields:
+
                   - { label: "Image", name: "src", widget: "image" }
