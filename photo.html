@@ -77,7 +77,7 @@
         <footer class="text-center text-xs text-gray-400 uppercase tracking-widest pb-4 border-t border-gray-100 pt-8 mt-auto">© 2026 Ahmet Keles. A Cravis Ltd. Production.</footer>
     </main>
 
-<div id="about-modal" class="modal-overlay fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div id="about-modal" class="modal-overlay fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="absolute inset-0" onclick="toggleAbout(false)"></div>
         <div class="relative w-full max-w-3xl p-6 md:p-16 max-h-[90vh] overflow-y-auto apple-box transform scale-95 opacity-0" id="about-box">
             <button onclick="toggleAbout(false)" class="absolute top-4 right-4 md:top-8 md:right-8 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition z-50">
@@ -141,21 +141,26 @@
             .catch(error => console.error('Error loading data:', error));
 
         function initGallery() {
-            if (siteData && siteData.photography) {
-                siteData.photography.forEach((cat, index) => {
+            // DEĞİŞİKLİK: 'photography' yerine Admin panelindeki 'photoCategories' ismini kullanıyoruz.
+            // Tasarım bozulmasın diye sadece veri ismini değiştirdim.
+            if (siteData && siteData.photoCategories) {
+                siteData.photoCategories.forEach((cat, index) => {
                     const wrapper = document.createElement('div');
                     if (index % 2 === 1) wrapper.className = "md:mt-32"; 
+
+                    // Admin panelinden gelen boş liste kontrolü
+                    const imageCount = cat.images ? cat.images.length : 0;
 
                     wrapper.innerHTML = `
                         <div class="category-card group mb-6" onclick="openGallery('${cat.id}')">
                             <div class="plus-icon">+</div>
-                            <img src="${cat.cover}" alt="${cat.title}">
+                            <img src="${cat.coverImage}" alt="${cat.title}">
                         </div>
                         <div class="flex justify-between items-start border-t border-gray-200 pt-6">
                             <h3 class="text-5xl md:text-7xl font-black tracking-tighter text-black cursor-pointer hover:text-gray-600 transition-colors uppercase leading-[0.9]" onclick="openGallery('${cat.id}')">
                                 ${cat.title}
                             </h3>
-                            <span class="text-sm font-mono text-gray-400 mt-2">[ ${cat.photos.length} ]</span>
+                            <span class="text-sm font-mono text-gray-400 mt-2">[ ${imageCount} ]</span>
                         </div>
                     `;
                     container.appendChild(wrapper);
@@ -168,14 +173,22 @@
         let isAnimating = false;
 
         function openGallery(catId) {
-            const category = siteData.photography.find(c => c.id === catId);
-            if (!category) return;
+            // DEĞİŞİKLİK: photoCategories içinde arama yapıyoruz
+            const category = siteData.photoCategories.find(c => c.id === catId);
+            if (!category || !category.images) return;
+            
             galleryTitle.innerText = category.title;
             masonry.innerHTML = ''; 
-            currentPhotoList = category.photos;
-            category.photos.forEach((photoUrl, idx) => {
+            
+            // DEĞİŞİKLİK: photos yerine images
+            currentPhotoList = category.images;
+            
+            category.images.forEach((photoUrl, idx) => {
                 const img = document.createElement('img');
-                img.src = photoUrl;
+                // Netlify CMS bazen resmi obje {src: "url"} bazen string "url" olarak verir. İkisini de destekleyen yapı:
+                const src = (typeof photoUrl === 'object') ? photoUrl.src : photoUrl;
+                
+                img.src = src;
                 img.className = 'photo-item hover:opacity-90 transition-opacity';
                 img.onclick = (e) => { e.stopPropagation(); openLightbox(idx); };
                 masonry.appendChild(img);
@@ -184,6 +197,7 @@
             document.body.style.overflow = 'hidden'; 
             gsap.to('.photo-item', { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, delay: 0.3, ease: "power2.out" });
         }
+
         function closeGallery() {
             galleryLayer.classList.remove('gallery-open');
             document.body.style.overflow = '';
@@ -194,12 +208,16 @@
             currentPhotoIndex = index;
             lightboxWrapper.innerHTML = '';
             const img = document.createElement('img');
-            img.src = currentPhotoList[currentPhotoIndex];
+            const rawUrl = currentPhotoList[currentPhotoIndex];
+            const src = (typeof rawUrl === 'object') ? rawUrl.src : rawUrl;
+            
+            img.src = src;
             img.className = 'lb-img-element';
             lightboxWrapper.appendChild(img);
             lightbox.classList.add('active');
             document.addEventListener('keydown', handleKeydown);
         }
+
         function closeLightbox() {
             lightbox.classList.remove('active');
             document.removeEventListener('keydown', handleKeydown);
@@ -216,7 +234,9 @@
             if (currentPhotoIndex < 0) currentPhotoIndex = currentPhotoList.length - 1;
             else if (currentPhotoIndex >= currentPhotoList.length) currentPhotoIndex = 0;
 
-            const nextUrl = currentPhotoList[currentPhotoIndex];
+            const nextRawUrl = currentPhotoList[currentPhotoIndex];
+            const nextUrl = (typeof nextRawUrl === 'object') ? nextRawUrl.src : nextRawUrl;
+
             const newImg = document.createElement('img');
             newImg.src = nextUrl;
             newImg.className = 'lb-img-element';
@@ -224,9 +244,6 @@
 
             const oldImg = lightboxWrapper.children[0]; 
 
-            // Yön Hesaplama: 
-            // 1 (İleri): Yeni sağdan gelir, Eski sola gider.
-            // -1 (Geri): Yeni soldan gelir, Eski sağa gider.
             const startX = direction > 0 ? "100%" : "-100%";
             const exitX = direction > 0 ? "-100%" : "100%";
 
@@ -238,7 +255,6 @@
                     isAnimating = false;
                 }
             });
-            // Easing 'power2.inOut' kullanılarak smooth bir kayma sağlandı
             tl.to(oldImg, { x: exitX, duration: 0.5, ease: "power2.inOut" }, 0)
               .to(newImg, { x: "0%", duration: 0.5, ease: "power2.inOut" }, 0);
         }
