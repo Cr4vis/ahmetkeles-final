@@ -48,7 +48,17 @@
       "id": "fashion",
       "title": "Fashion",
       "coverImage": "images/fashion_cover.jpg",
-      "images": []
+      "images": [
+        {
+          "src": "images/Cravis-Studio-Alize-masal-7146_1200x801.jpg"
+        },
+        {
+          "src": "images/DSC_0100.jpg"
+        },
+        {
+          "src": "images/DSC_7052.jpg"
+        }
+      ]
     }
   ]
 }
