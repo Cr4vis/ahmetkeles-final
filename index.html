@@ -38,8 +38,10 @@
         /* Archive & Modals */
         .archive-card { position: relative; overflow: hidden; background: #111; }
         .archive-iframe-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        .archive-iframe-wrapper iframe { width: 100%; height: 100%; transform: scale(1.5); pointer-events: none; opacity: 0.6; filter: grayscale(100%); transition: all 0.5s ease; }
-        .archive-card:hover iframe { opacity: 1; filter: grayscale(0%); transform: scale(1.1); }
+        
+        /* DUZELTME 1: Zoom scale efekti kaldirildi, sadece opacity/filter kaldi */
+        .archive-iframe-wrapper iframe { width: 100%; height: 100%; transform: scale(1.5); pointer-events: none; opacity: 0.6; filter: grayscale(100%); transition: opacity 0.5s ease, filter 0.5s ease; }
+        .archive-card:hover iframe { opacity: 1; filter: grayscale(0%); } 
         
         .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
@@ -133,6 +135,28 @@
         const wrapper = document.getElementById('content-wrapper');
         let siteData = {};
 
+        // DUZELTME 2 & 3: Intersection Observer ile Lazy Loading ve Performans
+        // Sadece ekrana giren videolari yukle
+        const observerOptions = {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1
+        };
+
+        const lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const iframe = entry.target;
+                    if (iframe.dataset.src) {
+                        iframe.src = iframe.dataset.src;
+                        iframe.removeAttribute('data-src');
+                        // Yuklendikten sonra gozlemlemeyi birak
+                        observer.unobserve(iframe);
+                    }
+                }
+            });
+        }, observerOptions);
+
         fetch('data.json')
             .then(response => response.json())
             .then(data => {
@@ -154,7 +178,6 @@
                         ? `${words.slice(0, -1).join(' ')} <br> <span class="gradient-text">${words[words.length - 1]}</span>`
                         : `<span class="gradient-text">${project.title}</span>`;
 
-                    // Vimeo Background Embed
                     section.innerHTML = `
                         <div class="vimeo-wrapper">
                             <iframe src="https://player.vimeo.com/video/${project.vimeoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
@@ -193,15 +216,22 @@
 
             if (siteData.gridProjects) {
                 siteData.gridProjects.forEach(item => {
-                    // Extra videoları JSON string olarak sakla
                     const extraVideosJson = JSON.stringify(item.extraVideos || []).replace(/"/g, '&quot;');
+                    
+                    // DUZELTME 1 Devami: Mouse Hover Eventleri ve api=1 parametresi
+                    // Lazy load icin src yerine data-src kullaniyoruz
                     
                     gridHTML += `
                         <div class="archive-card relative aspect-video bg-gray-900 rounded-sm overflow-hidden cursor-pointer group w-full" 
-                             onclick="openProjectModal('${item.vimeoId}', '${item.title}', '${item.category}', ${extraVideosJson})">
+                             onclick="openProjectModal('${item.vimeoId}', '${item.title}', '${item.category}', ${extraVideosJson})"
+                             onmouseenter="playPreview(this)" 
+                             onmouseleave="resetPreview(this)">
                             
                             <div class="archive-iframe-wrapper">
-                                <iframe src="https://player.vimeo.com/video/${item.vimeoId}?background=1&autoplay=0&loop=1&byline=0&title=0&muted=1" frameborder="0" allow="fullscreen"></iframe>
+                                <iframe data-src="https://player.vimeo.com/video/${item.vimeoId}?background=1&autoplay=0&loop=1&byline=0&title=0&muted=1&api=1" 
+                                        frameborder="0" 
+                                        allow="fullscreen"
+                                        class="lazy-iframe"></iframe>
                             </div>
                             
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition-opacity pointer-events-none"></div>
@@ -222,10 +252,39 @@
             gridSection.innerHTML = gridHTML;
             wrapper.appendChild(gridSection);
             
+            // Lazy Load Baslat
+            const lazyIframes = document.querySelectorAll('.lazy-iframe');
+            lazyIframes.forEach(iframe => lazyLoadObserver.observe(iframe));
+
             const resizeObserver = new ResizeObserver(() => { updateBoundaries(); });
             resizeObserver.observe(wrapper);
             updateBoundaries();
         }
+
+        // DUZELTME 1 (Scrubbing Logic): Vimeo API ile Oynat/Durdur
+        function playPreview(element) {
+            const iframe = element.querySelector('iframe');
+            // Sadece iframe src yuklenmisse komut gonder
+            if(iframe.src && iframe.src.includes('vimeo')) {
+                iframe.contentWindow.postMessage('{"method":"play"}', '*');
+            }
+        }
+
+        function resetPreview(element) {
+            const iframe = element.querySelector('iframe');
+            if(iframe.src && iframe.src.includes('vimeo')) {
+                iframe.contentWindow.postMessage('{"method":"pause"}', '*');
+                iframe.contentWindow.postMessage('{"method":"setCurrentTime", "value":0}', '*');
+            }
+        }
+        
+        // DUZELTME 3: Mobil Geri Donus Sorunu
+        // Sayfa onbellekten geri yuklendiginde (back butonu) videolari canlandir
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload(); 
+            }
+        });
 
         // SCROLL LOGIC
         let sections = [];
@@ -401,4 +460,5 @@
         }
     </script>
 </body>
+
 </html>
