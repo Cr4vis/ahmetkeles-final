@@ -116,8 +116,21 @@
         },
         {
           "src": "images/DSC8277.jpg"
+        },
+        {
+          "src": "images/FERRY-1.jpg"
+        },
+        {
+          "src": "images/DSC_8296.jpg"
+        },
+        {
+          "src": "images/DSC_5328.jpg"
+        },
+        {
+          "src": "images/DSC_5265.jpg"
         }
-      ]
+      ],
+      "coverImage": "images/047.JPG"
     },
     {
       "id": "Food",
