@@ -39,7 +39,6 @@
         .archive-card { position: relative; overflow: hidden; background: #111; }
         .archive-iframe-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        /* DUZELTME 1: Zoom scale efekti kaldirildi, sadece opacity/filter kaldi */
         .archive-iframe-wrapper iframe { width: 100%; height: 100%; transform: scale(1.5); pointer-events: none; opacity: 0.6; filter: grayscale(100%); transition: opacity 0.5s ease, filter 0.5s ease; }
         .archive-card:hover iframe { opacity: 1; filter: grayscale(0%); } 
         
@@ -135,8 +134,7 @@
         const wrapper = document.getElementById('content-wrapper');
         let siteData = {};
 
-        // DUZELTME 2 & 3: Intersection Observer ile Lazy Loading ve Performans
-        // Sadece ekrana giren videolari yukle
+        // Lazy Loading Observer
         const observerOptions = {
             root: null,
             rootMargin: '100px',
@@ -150,7 +148,6 @@
                     if (iframe.dataset.src) {
                         iframe.src = iframe.dataset.src;
                         iframe.removeAttribute('data-src');
-                        // Yuklendikten sonra gozlemlemeyi birak
                         observer.unobserve(iframe);
                     }
                 }
@@ -177,6 +174,8 @@
                     let titleHTML = words.length > 1 
                         ? `${words.slice(0, -1).join(' ')} <br> <span class="gradient-text">${words[words.length - 1]}</span>`
                         : `<span class="gradient-text">${project.title}</span>`;
+                    
+                    const extraVideosJson = JSON.stringify(project.extraVideos || []).replace(/"/g, '&quot;');
 
                     section.innerHTML = `
                         <div class="vimeo-wrapper">
@@ -191,7 +190,7 @@
                         
                         <div class="absolute bottom-10 right-10 z-20 flex items-center gap-6">
                             <div class="text-xs font-mono text-gray-400">0${index + 1} — 0${siteData.heroProjects.length}</div>
-                            <button onclick="openProjectModal('${project.vimeoId}', '${project.title.replace(/'/g, "\\'")}', '${project.subtitle}', [])" class="glass-btn w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/20 transition group">
+                            <button onclick="openProjectModal('${project.vimeoId}', '${project.title.replace(/'/g, "\\'")}', '${project.subtitle}', ${extraVideosJson})" class="glass-btn w-14 h-14 rounded-full flex items-center justify-center hover:bg-white/20 transition group">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:translate-y-1 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 12.75l-3.25-3.25m3.25 3.25l3.25-3.25M12 12.75V3" /></svg>
                             </button>
                         </div>
@@ -218,14 +217,10 @@
                 siteData.gridProjects.forEach(item => {
                     const extraVideosJson = JSON.stringify(item.extraVideos || []).replace(/"/g, '&quot;');
                     
-                    // DUZELTME 1 Devami: Mouse Hover Eventleri ve api=1 parametresi
-                    // Lazy load icin src yerine data-src kullaniyoruz
-                    
                     gridHTML += `
-                        <div class="archive-card relative aspect-video bg-gray-900 rounded-sm overflow-hidden cursor-pointer group w-full" 
-                             onclick="openProjectModal('${item.vimeoId}', '${item.title}', '${item.category}', ${extraVideosJson})"
+                        <div class="archive-card relative aspect-video bg-gray-900 rounded-sm overflow-hidden group w-full" 
                              onmouseenter="playPreview(this)" 
-                             onmouseleave="resetPreview(this)">
+                             onmouseleave="pausePreview(this)">
                             
                             <div class="archive-iframe-wrapper">
                                 <iframe data-src="https://player.vimeo.com/video/${item.vimeoId}?background=1&autoplay=0&loop=1&byline=0&title=0&muted=1&api=1" 
@@ -241,9 +236,10 @@
                                 <h3 class="text-3xl md:text-4xl font-black leading-none uppercase text-white">${item.title}</h3>
                             </div>
                             
-                            <div class="absolute top-4 right-4 glass-btn w-12 h-12 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
+                            <button onclick="openProjectModal('${item.vimeoId}', '${item.title}', '${item.category}', ${extraVideosJson})" 
+                                    class="absolute top-4 right-4 glass-btn w-12 h-12 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black z-30 cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" /></svg>
-                            </div>
+                            </button>
                         </div>
                     `;
                 });
@@ -252,7 +248,7 @@
             gridSection.innerHTML = gridHTML;
             wrapper.appendChild(gridSection);
             
-            // Lazy Load Baslat
+            // Lazy Load Başlat
             const lazyIframes = document.querySelectorAll('.lazy-iframe');
             lazyIframes.forEach(iframe => lazyLoadObserver.observe(iframe));
 
@@ -261,25 +257,22 @@
             updateBoundaries();
         }
 
-        // DUZELTME 1 (Scrubbing Logic): Vimeo API ile Oynat/Durdur
+        // --- PREVIEW LOGIC (Play on Hover / Pause on Leave) ---
         function playPreview(element) {
             const iframe = element.querySelector('iframe');
-            // Sadece iframe src yuklenmisse komut gonder
             if(iframe.src && iframe.src.includes('vimeo')) {
                 iframe.contentWindow.postMessage('{"method":"play"}', '*');
             }
         }
 
-        function resetPreview(element) {
+        function pausePreview(element) {
             const iframe = element.querySelector('iframe');
             if(iframe.src && iframe.src.includes('vimeo')) {
                 iframe.contentWindow.postMessage('{"method":"pause"}', '*');
-                iframe.contentWindow.postMessage('{"method":"setCurrentTime", "value":0}', '*');
             }
         }
         
-        // DUZELTME 3: Mobil Geri Donus Sorunu
-        // Sayfa onbellekten geri yuklendiginde (back butonu) videolari canlandir
+        // --- PAGE RESTORE LOGIC ---
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
                 window.location.reload(); 
@@ -425,19 +418,15 @@
         const extraVideosGrid = document.getElementById('extra-videos-grid');
 
         function openProjectModal(vimeoId, title, category, extraVideos) {
-            // Main Video Setup
             modalIframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`;
             modalTitle.innerText = title;
             modalCategory.innerText = category;
             
-            // Extra Videos Setup
-            extraVideosGrid.innerHTML = ''; // Temizle
+            extraVideosGrid.innerHTML = ''; 
             if (extraVideos && extraVideos.length > 0) {
                 extraVideosContainer.classList.remove('hidden');
                 extraVideos.forEach(vid => {
-                    // Güvenlik kontrolü: Eğer obje ise id'yi al, string ise direkt kullan
                     const vidId = (typeof vid === 'object') ? vid.id : vid;
-                    
                     const vidDiv = document.createElement('div');
                     vidDiv.className = 'w-full aspect-video bg-gray-900 rounded-lg overflow-hidden';
                     vidDiv.innerHTML = `<iframe src="https://player.vimeo.com/video/${vidId}?title=0&byline=0" class="w-full h-full" frameborder="0" allow="fullscreen"></iframe>`;
@@ -460,6 +449,4 @@
         }
     </script>
 </body>
-
 </html>
-
