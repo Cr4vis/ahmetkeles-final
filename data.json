@@ -62,6 +62,155 @@
         },
         {
           "src": "images/DSC_7052.jpg"
+        },
+        {
+          "src": "images/DSC7067.jpg"
+        },
+        {
+          "src": "images/DSC_0179.jpg"
+        },
+        {
+          "src": "images/DSC_0247.jpg"
+        },
+        {
+          "src": "images/DSC_1570.jpg"
+        },
+        {
+          "src": "images/DSC_3624.jpg"
+        },
+        {
+          "src": "images/nako-cadde4006sml.jpg"
+        }
+      ]
+    },
+    {
+      "title": "Product",
+      "id": "Product",
+      "images": [
+        {
+          "src": "images/047.JPG"
+        },
+        {
+          "src": "images/DSC_9103.jpg"
+        },
+        {
+          "src": "images/039.JPG"
+        },
+        {
+          "src": "images/029.JPG"
+        },
+        {
+          "src": "images/027.JPG"
+        },
+        {
+          "src": "images/025.JPG"
+        },
+        {
+          "src": "images/70caa2106856327.5f998071e3ecb.jpg"
+        },
+        {
+          "src": "images/DSC6322.jpg"
+        },
+        {
+          "src": "images/product_cover.jpg"
+        },
+        {
+          "src": "images/DSC8277.jpg"
+        }
+      ]
+    },
+    {
+      "id": "Food",
+      "title": "Food",
+      "coverImage": "images/Cravis-Studio-Kara-Fırın-DSC0138_801x1200.jpg",
+      "images": [
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0138_801x1200.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0355_801x1200.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0421_1200x801.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0457_1200x801.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0570_1200x801.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0662_1200x801.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0683_801x1200.jpg"
+        },
+        {
+          "src": "images/Cravis-Studio-Kara-Fırın-DSC0705_1200x801.jpg"
+        },
+        {
+          "src": "images/DSC3880.jpg"
+        },
+        {
+          "src": "images/DSC3962.jpg"
+        },
+        {
+          "src": "images/DSC4511.jpg"
+        },
+        {
+          "src": "images/DSC4673.jpg"
+        },
+        {
+          "src": "images/DSC7580.jpg"
+        },
+        {
+          "src": "images/DSC7633.jpg"
+        },
+        {
+          "src": "images/DSC7693.jpg"
+        }
+      ]
+    },
+    {
+      "id": "Architecture ",
+      "title": "Architecture",
+      "coverImage": "images/DSC_9486-HDR.jpg",
+      "images": [
+        {
+          "src": "images/Antusa-Palace_5.jpg"
+        },
+        {
+          "src": "images/Bodrum-Palace_1.jpg"
+        },
+        {
+          "src": "images/Bodrum-Palace_3.jpg"
+        },
+        {
+          "src": "images/Bodrum-Palace_5.jpg"
+        },
+        {
+          "src": "images/Bodrum-Palace_6.jpg"
+        },
+        {
+          "src": "images/Bodrum-Palace_9.jpg"
+        },
+        {
+          "src": "images/DSC_3528.jpg"
+        },
+        {
+          "src": "images/DSC_3535.jpg"
+        },
+        {
+          "src": "images/Sultan-Corner_4.jpg"
+        },
+        {
+          "src": "images/Sultan-Suleyman-Hammam_4.jpg"
+        },
+        {
+          "src": "images/Sura-Deneme2904.jpg"
+        },
+        {
+          "src": "images/arch_cover.jpg"
         }
       ]
     }
