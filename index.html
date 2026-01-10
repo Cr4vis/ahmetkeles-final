@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cravis - Video Portfolio</title>
+    <title>Cravis Archive - Video</title>
     <style>
-        /* TEMEL AYARLAR */
-        body { margin: 0; background: #000; color: #fff; font-family: 'Helvetica', sans-serif; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; }
         
-        /* GRID YAPISI */
+        /* Grid Yapısı */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
-            padding: 10px;
+            gap: 20px;
+            padding: 20px;
         }
 
         .video-card {
             position: relative;
             background: #111;
-            aspect-ratio: 16/9;
-            overflow: hidden;
+            cursor: default; /* Karta tıklayınca bir şey olmaz */
         }
 
         .video-card video {
@@ -30,87 +28,99 @@
             display: block;
         }
 
-        /* PLAY BUTONU (Mobilde Hayati Önem Taşıyor) */
-        .play-overlay {
+        /* Oynat Butonu (Mobilde ve Masaüstünde Görünür) */
+        .play-btn {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             display: flex;
-            align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2);
-            opacity: 0;
-            transition: opacity 0.3s;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            z-index: 2; /* Videonun üzerinde */
+            z-index: 2;
+            transition: background 0.3s;
         }
         
-        /* Mobilde buton hep görünür olsun ki nereye basacağını bilsin */
-        @media (max-width: 768px) {
-            .play-overlay { opacity: 1; background: rgba(0,0,0,0.1); }
+        .play-btn::after {
+            content: '▶';
+            color: #fff;
+            font-size: 20px;
+            margin-left: 4px;
         }
 
-        .video-card:hover .play-overlay {
-            opacity: 1;
+        .play-btn:hover {
+            background: rgba(255, 0, 0, 0.8);
         }
 
-        .play-icon {
-            width: 50px; height: 50px;
-            background: white;
-            border-radius: 50%;
-            position: relative;
-        }
-        .play-icon::after {
-            content: '';
-            position: absolute;
-            top: 15px; left: 18px;
-            border-left: 20px solid black;
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-        }
-
-        /* MODAL (Açılır Pencere) */
+        /* MODAL (Player) */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(0,0,0,0.95);
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             flex-direction: column;
         }
 
-        .modal-container {
+        .modal-content {
             position: relative;
             width: 90%;
-            max-width: 1200px;
+            max-width: 1000px;
             aspect-ratio: 16/9;
         }
 
         .modal video {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             background: #000;
         }
 
-        /* İLERİ GERİ BUTONLARI */
+        /* Navigasyon Butonları */
         .nav-btn {
             position: absolute;
-            top: 50%; transform: translateY(-50%);
+            top: 50%;
+            transform: translateY(-50%);
             background: rgba(255,255,255,0.1);
-            color: white; border: none;
-            padding: 20px; font-size: 24px;
-            cursor: pointer; z-index: 1001;
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            user-select: none;
         }
         .nav-btn:hover { background: rgba(255,255,255,0.3); }
         .prev { left: -60px; }
         .next { right: -60px; }
-
-        .close-btn {
+        
+        /* Kapat Butonu */
+        .close {
             position: absolute;
-            top: 20px; right: 30px;
-            color: #fff; font-size: 40px; cursor: pointer;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
         }
 
+        /* Mobile Responsive */
         @media (max-width: 768px) {
+            .nav-btn {
+                padding: 10px;
+                font-size: 18px;
+            }
             .prev { left: -10px; background: rgba(0,0,0,0.5); }
             .next { right: -10px; background: rgba(0,0,0,0.5); }
         }
@@ -118,118 +128,131 @@
 </head>
 <body>
 
-    <nav style="padding:20px; text-align:center;">
-        <a href="index.html" style="color:white; margin-right:20px;">VIDEO</a>
-        <a href="photo.html" style="color:gray;">PHOTO</a>
-    </nav>
+    <h2 style="text-align:center; margin-top:20px;">Video Archive</h2>
 
-    <div class="video-grid" id="videoGrid">
+    <div class="video-grid">
+        
+        <div class="video-card">
+            <div class="play-btn" onclick="openModal('nike', 0)"></div>
+            <video muted loop playsinline poster="https://via.placeholder.com/600x400/333/fff?text=Nike+1">
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            </video>
         </div>
+
+        <div class="video-card">
+            <div class="play-btn" onclick="openModal('nike', 1)"></div>
+            <video muted loop playsinline poster="https://via.placeholder.com/600x400/444/fff?text=Nike+2">
+                <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="video-card">
+            <div class="play-btn" onclick="openModal('adidas', 0)"></div>
+            <video muted loop playsinline poster="https://via.placeholder.com/600x400/555/fff?text=Adidas">
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            </video>
+        </div>
+
+    </div>
 
     <div id="videoModal" class="modal">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <div class="modal-container">
+        <span class="close" onclick="closeModal()">&times;</span>
+        
+        <div class="modal-content">
             <button class="nav-btn prev" id="prevBtn" onclick="changeVideo(-1)">&#10094;</button>
-            <video id="mainVideo" controls playsinline></video>
+            <video id="mainVideo" controls></video>
             <button class="nav-btn next" id="nextBtn" onclick="changeVideo(1)">&#10095;</button>
         </div>
+        <p id="videoInfo" style="margin-top:10px; color:#ccc;"></p>
     </div>
 
     <script>
-        // === VİDEO VERİLERİ (Burası data.js gibi çalışır) ===
-        // group: Aynı proje videolarını gruplamak için (örn: 'nike', 'adidas')
-        const videos = [
-            { id: 1, src: "https://www.w3schools.com/html/mov_bbb.mp4", poster: "", group: "nike" },
-            { id: 2, src: "https://www.w3schools.com/html/movie.mp4", poster: "", group: "nike" },
-            { id: 3, src: "https://www.w3schools.com/html/mov_bbb.mp4", poster: "", group: "adidas" },
-            { id: 4, src: "https://www.w3schools.com/html/movie.mp4", poster: "", group: "zara" },
-        ];
+        // === VERİ YAPISI ===
+        // Videoları gruplarına göre burada tanımlıyoruz (Backend varsa oradan çekilir)
+        const videoData = {
+            'nike': [
+                "https://www.w3schools.com/html/mov_bbb.mp4",
+                "https://www.w3schools.com/html/movie.mp4"
+            ],
+            'adidas': [
+                "https://www.w3schools.com/html/mov_bbb.mp4"
+            ]
+        };
 
-        const grid = document.getElementById('videoGrid');
+        let currentGroup = [];
+        let currentIndex = 0;
         const modal = document.getElementById('videoModal');
         const mainVideo = document.getElementById('mainVideo');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
+        const videoInfo = document.getElementById('videoInfo');
 
-        let currentPlaylist = []; // O anki grubun listesi
-        let currentIndex = 0;     // O anki videonun sırası
-
-        // 1. Videoları Sayfaya Basma
-        videos.forEach(vid => {
-            const card = document.createElement('div');
-            card.className = 'video-card';
-            card.innerHTML = `
-                <video muted loop playsinline preload="metadata" poster="${vid.poster}">
-                    <source src="${vid.src}" type="video/mp4">
-                </video>
-                <div class="play-overlay" onclick="openModal('${vid.group}', '${vid.src}')">
-                    <div class="play-icon"></div>
-                </div>
-            `;
-            
-            // Hover Olayları (Play/Pause)
-            const videoEl = card.querySelector('video');
-            
-            card.addEventListener('mouseenter', () => {
-                videoEl.play().catch(() => {}); // Hata verirse yut (tarayıcı politikası)
+        // === 1. HOVER DAVRANIŞI (Mouse gelince oyna, gidince dur) ===
+        const cards = document.querySelectorAll('.video-card video');
+        
+        cards.forEach(vid => {
+            vid.parentElement.addEventListener('mouseenter', () => {
+                vid.play().catch(e => console.log("Oynatma hatası:", e));
             });
             
-            card.addEventListener('mouseleave', () => {
-                videoEl.pause(); // Sadece durdur, başa sarma!
+            vid.parentElement.addEventListener('mouseleave', () => {
+                vid.pause(); // Sadece durdurur, başa almaz!
             });
-
-            grid.appendChild(card);
         });
 
-        // 2. Modalı Açma (Grup Mantığıyla)
-        window.openModal = function(groupName, clickedSrc) {
-            // Tıklanan videonun grubundaki tüm videoları bul
-            currentPlaylist = videos.filter(v => v.group === groupName);
+        // === 2. MODAL AÇMA (Sadece Butona Tıklayınca) ===
+        function openModal(groupName, index) {
+            currentGroup = videoData[groupName];
+            currentIndex = index;
             
-            // Tıklanan videonun o listedeki sırasını bul
-            currentIndex = currentPlaylist.findIndex(v => v.src === clickedSrc);
-
-            updatePlayer();
-            modal.style.display = 'flex';
+            updateModalPlayer();
+            modal.style.display = "flex";
+            
+            // İlk açılışta oynat
             mainVideo.play();
         }
 
-        // 3. Modalı Kapatma (Video Tamamen Durur)
-        window.closeModal = function() {
-            modal.style.display = 'none';
-            mainVideo.pause();
-            mainVideo.currentTime = 0;
-            mainVideo.src = ""; // Arka planda yüklemeyi kesmek için
+        // === 3. MODAL KAPATMA (Tamamen Durdurma) ===
+        function closeModal() {
+            modal.style.display = "none";
+            mainVideo.pause();       // Durdur
+            mainVideo.currentTime = 0; // Başa sar (İsteğe bağlı)
+            mainVideo.src = "";      // Kaynağı boşalt (Arka planda yüklemeyi keser)
         }
 
-        // 4. İleri / Geri Fonksiyonu
-        window.changeVideo = function(direction) {
+        // === 4. PLAYLIST MANTIĞI (İleri/Geri) ===
+        function changeVideo(direction) {
             currentIndex += direction;
             
-            // Başa veya sona gelince döngü
-            if (currentIndex >= currentPlaylist.length) currentIndex = 0;
-            if (currentIndex < 0) currentIndex = currentPlaylist.length - 1;
+            // Döngü (Sondan başa, baştan sona)
+            if (currentIndex >= currentGroup.length) currentIndex = 0;
+            if (currentIndex < 0) currentIndex = currentGroup.length - 1;
 
-            updatePlayer();
+            updateModalPlayer();
             mainVideo.play();
         }
 
-        function updatePlayer() {
-            mainVideo.src = currentPlaylist[currentIndex].src;
+        function updateModalPlayer() {
+            // Videoyu yükle
+            mainVideo.src = currentGroup[currentIndex];
             
-            // Eğer grupta tek video varsa okları gizle
-            if (currentPlaylist.length > 1) {
+            // Tek video varsa okları gizle
+            if (currentGroup.length > 1) {
                 prevBtn.style.display = 'block';
                 nextBtn.style.display = 'block';
+                videoInfo.innerText = `Video ${currentIndex + 1} / ${currentGroup.length}`;
             } else {
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
+                videoInfo.innerText = "";
             }
         }
-        
-        // Modal dışına tıklayınca kapat
-        window.onclick = function(e) {
-            if (e.target == modal) closeModal();
+
+        // Modal dışına tıklayınca kapatma
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
         }
     </script>
 </body>
