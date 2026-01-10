@@ -14,7 +14,12 @@
     {
       "title": "NIKE",
       "subtitle": "CINEMA 4D / REDSHIFT",
-      "vimeoId": "787522255"
+      "vimeoId": "787522255",
+      "extraVideos": [
+        {
+          "id": "792414965"
+        }
+      ]
     }
   ],
   "gridProjects": [
