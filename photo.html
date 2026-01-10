@@ -27,8 +27,11 @@
         /* LIGHTBOX & SLIDE */
         #lightbox { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; background: rgba(255, 255, 255, 0.98); }
         #lightbox.active { opacity: 1; pointer-events: all; }
+        /* DUZELTME 4: Lightbox wrapper'in pointer eventlerini kapattik, asagida resme ozel acacagiz */
         #lightbox-wrapper { position: relative; width: 100%; height: 100%; max-height: 95vh; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
-        .lb-img-element { max-width: 100%; max-height: 95vh; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: absolute; }
+        
+        /* DUZELTME 4 Devami: Resme tiklayinca bir sey olmamasi icin pointer-events auto yapildi ama onclick eventi atanmayacak */
+        .lb-img-element { max-width: 100%; max-height: 95vh; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: absolute; pointer-events: auto; }
 
         .lb-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #333; transition: all 0.3s ease; z-index: 20; }
         .lb-nav-btn:hover { transform: translateY(-50%) scale(1.1); color: #000; }
@@ -141,14 +144,11 @@
             .catch(error => console.error('Error loading data:', error));
 
         function initGallery() {
-            // DEĞİŞİKLİK: 'photography' yerine Admin panelindeki 'photoCategories' ismini kullanıyoruz.
-            // Tasarım bozulmasın diye sadece veri ismini değiştirdim.
             if (siteData && siteData.photoCategories) {
                 siteData.photoCategories.forEach((cat, index) => {
                     const wrapper = document.createElement('div');
                     if (index % 2 === 1) wrapper.className = "md:mt-32"; 
 
-                    // Admin panelinden gelen boş liste kontrolü
                     const imageCount = cat.images ? cat.images.length : 0;
 
                     wrapper.innerHTML = `
@@ -173,19 +173,16 @@
         let isAnimating = false;
 
         function openGallery(catId) {
-            // DEĞİŞİKLİK: photoCategories içinde arama yapıyoruz
             const category = siteData.photoCategories.find(c => c.id === catId);
             if (!category || !category.images) return;
             
             galleryTitle.innerText = category.title;
             masonry.innerHTML = ''; 
             
-            // DEĞİŞİKLİK: photos yerine images
             currentPhotoList = category.images;
             
             category.images.forEach((photoUrl, idx) => {
                 const img = document.createElement('img');
-                // Netlify CMS bazen resmi obje {src: "url"} bazen string "url" olarak verir. İkisini de destekleyen yapı:
                 const src = (typeof photoUrl === 'object') ? photoUrl.src : photoUrl;
                 
                 img.src = src;
@@ -213,6 +210,12 @@
             
             img.src = src;
             img.className = 'lb-img-element';
+            
+            // DUZELTME 4: Resme ozel click listener ekleyip propagation'i durduruyoruz.
+            // Bu, resme tiklandiginda arkadaki 'lightbox' wrapper'ina tiklamayi iletmesini engeller.
+            // Boylece resme zoom yaparken veya tiklarken kapanmaz/degismez.
+            img.onclick = (e) => { e.stopPropagation(); }; 
+            
             lightboxWrapper.appendChild(img);
             lightbox.classList.add('active');
             document.addEventListener('keydown', handleKeydown);
@@ -224,7 +227,6 @@
             setTimeout(() => { lightboxWrapper.innerHTML = ''; }, 300);
         }
 
-        // SLIDE ANIMASYON MANTIĞI
         function changeImage(direction) {
             if (isAnimating) return;
             isAnimating = true;
@@ -240,6 +242,9 @@
             const newImg = document.createElement('img');
             newImg.src = nextUrl;
             newImg.className = 'lb-img-element';
+            // Resim degistiginde de yeni gelen resme click korumasi ekle
+            newImg.onclick = (e) => { e.stopPropagation(); };
+
             lightboxWrapper.appendChild(newImg);
 
             const oldImg = lightboxWrapper.children[0]; 
